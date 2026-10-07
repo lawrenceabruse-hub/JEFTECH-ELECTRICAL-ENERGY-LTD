@@ -1,30 +1,41 @@
 # JEFTECH ELECTRICAL ENERGY LTD website
 
-A responsive company website with direct email, phone, and WhatsApp contact links, plus an automatically sliding electrical work and panel photo gallery. The images are examples, not claims of completed JEFTECH projects. The site does not use AI, an API key, or a visitor chat service.
+A responsive company website with customer enquiry storage, a password-protected content dashboard, and an automatically sliding work gallery. The photos are illustrative examples, not claims of completed JEFTECH projects. Customer enquiries and content are stored in PostgreSQL. The site does not use AI, an API key, or a visitor chat service.
 
-## Preview locally
+## Backend features
 
-Open `index.html/index.html` in a browser, or run the site through Node.js 18 or later:
+- Website enquiries are saved for the admin to review and mark new, contacted, or closed.
+- The dashboard at `/admin` can add, edit, and remove services and work-gallery items.
+- Admin sign-in uses an HTTP-only, same-site session cookie and passwords hashed with Node.js scrypt.
+- PostgreSQL stores administrator sessions, enquiries, services, and work-gallery content.
+
+Enquiries are stored in the dashboard; this backend does not email notifications. A configured email provider can be added separately if email alerts are required.
+
+## Run locally
+
+Use Node.js 18 or later and a PostgreSQL database. Copy `.env.example` to `.env`, replace all example values, then run:
 
 ```sh
+npm install
 npm start
 ```
 
-Then open [http://localhost:3000](http://localhost:3000). Check that the site assets are available at `/healthz`.
+Open [http://localhost:3000](http://localhost:3000). The admin dashboard is at [http://localhost:3000/admin](http://localhost:3000/admin). On first startup, the backend creates the database tables and seeds the initial services and gallery entries. Keep `.env` private; never upload it to GitHub.
 
-## Publish with Render
+## Deploy with Render and a hosted PostgreSQL database
 
-The included `render.yaml` deploys the website as a small Node.js web service. No API key or other secret is required.
+The Render web service can stay on the free plan. The database provider has its own plan limits and terms; verify its current free tier, backups, and retention before relying on it for business records.
 
-1. Upload the project files to a GitHub repository, keeping `server.js`, `package.json`, `render.yaml`, and the full `index.html/` folder (including its `images/` subfolder) together.
-2. In Render, select **New > Blueprint**, connect the repository, and deploy using `render.yaml`. If updating the earlier AI deployment, push these changes and redeploy the existing service; remove the unused `OPENAI_API_KEY` from that service's Environment settings.
-3. After deployment, open the Render URL. Check `/healthz` and confirm it returns `"status":"ok"` and `"websiteAssetsAvailable":true`.
-4. Add a custom domain from the Render service settings if desired, and follow the DNS instructions shown by Render.
-5. Submit `https://YOUR-DOMAIN/sitemap.xml` in Google Search Console to help Google discover the site. Indexing and search ranking are controlled by Google and are not guaranteed.
+1. Create a PostgreSQL database with a provider that supports external TLS connections. Copy its private connection URL (do not post it publicly).
+2. In the Render dashboard, open the website service’s **Environment** settings. Add `DATABASE_URL` with that connection URL, `ADMIN_EMAIL` with the administrator email, and `ADMIN_PASSWORD` with a unique password of at least 14 characters. Do not use the example password.
+3. Upload/push the project files to the connected GitHub repository, preserving the root `server.js`, `package.json`, `render.yaml`, and entire `index.html/` directory (including `images/`).
+4. Deploy the latest commit in Render. Check `/healthz` for `"status":"ok"`, `"databaseConnected":true`, and `"websiteAssetsAvailable":true`.
+5. Open `/admin`, sign in with `ADMIN_EMAIL` and the initial `ADMIN_PASSWORD`, then change the password in the dashboard. On first boot the configured credentials are hashed into the database; later changing the environment variable alone does not reset the stored password.
+6. Submit a test enquiry from the public contact form and verify it appears under **Enquiries**. Add or edit a service/gallery item and reload the public page to verify it.
 
-Render's free service may spin down while idle. An always-on hosting plan avoids that delay and may have a cost.
+Do not place database URLs, admin passwords, or other credentials in client-side files, commit history, screenshots, or public messages. Render's free web service may spin down while idle, causing a delay on the first request.
 
-## Contact links
+## Public contact details
 
 - Phone: `+234 706 758 7195`
 - Email: `jeftech12345@hotmail.com`
