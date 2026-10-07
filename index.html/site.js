@@ -67,6 +67,12 @@ window.jeftechContentReady = loadWebsiteContent()
     window.dispatchEvent(new Event("jeftech:content-ready"));
   });
 
+document.querySelectorAll(".mobile-menu nav a").forEach((link) => {
+  link.addEventListener("click", () => {
+    link.closest(".mobile-menu").open = false;
+  });
+});
+
 const enquiryForm = document.querySelector("#enquiry-form");
 if (enquiryForm) {
   const feedback = document.querySelector("#enquiry-feedback");
