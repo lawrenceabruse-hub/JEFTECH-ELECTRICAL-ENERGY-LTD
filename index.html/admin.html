@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1930">
+    <title>Website administration | JEFTECH ELECTRICAL ENERGY LTD</title>
+    <link rel="icon" href="jeftech-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="admin.css">
+    <script src="admin.js" defer></script>
+  </head>
+  <body>
+    <header class="admin-header">
+      <a class="admin-brand" href="/">
+        <img src="jeftech-mark.svg" width="38" height="38" alt="">
+        <span>JEFTECH <small>WEBSITE ADMIN</small></span>
+      </a>
+      <a class="back-link" href="/">View website <span aria-hidden="true">↗</span></a>
+    </header>
+    <main class="admin-main">
+      <section class="login-panel" id="login-panel">
+        <p class="eyebrow">Private area</p>
+        <h1>Admin sign in</h1>
+        <p>Sign in to manage customer enquiries, services, and the work gallery.</p>
+        <form id="login-form">
+          <label>Email address<input name="email" type="email" autocomplete="username" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+          <button class="button button-primary" type="submit">Sign in</button>
+        </form>
+        <p class="feedback" id="login-feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="dashboard" id="dashboard" hidden>
+        <div class="dashboard-heading">
+          <div>
+            <p class="eyebrow">JEFTECH ELECTRICAL ENERGY LTD</p>
+            <h1>Website dashboard</h1>
+            <p>Signed in as <strong id="admin-email"></strong></p>
+          </div>
+          <button class="button button-secondary" id="logout-button" type="button">Sign out</button>
+        </div>
+
+        <section class="admin-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Customer messages</p><h2>Enquiries</h2></div>
+            <label class="filter-label">Show
+              <select id="enquiry-filter">
+                <option value="">All statuses</option>
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="closed">Closed</option>
+              </select>
+            </label>
+          </div>
+          <p class="feedback" id="enquiry-feedback" role="status" aria-live="polite"></p>
+          <div class="enquiry-list" id="enquiry-list"></div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Website content</p><h2>Services</h2></div>
+            <button class="button button-primary" id="new-service-button" type="button">Add service</button>
+          </div>
+          <p class="feedback" id="service-feedback" role="status" aria-live="polite"></p>
+          <form class="editor-form" id="service-form" hidden></form>
+          <div class="content-list" id="service-list"></div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Website content</p><h2>Work gallery</h2></div>
+            <button class="button button-primary" id="new-project-button" type="button">Add gallery item</button>
+          </div>
+          <p class="feedback" id="project-feedback" role="status" aria-live="polite"></p>
+          <form class="editor-form" id="project-form" hidden></form>
+          <div class="content-list" id="project-list"></div>
+        </section>
+
+        <section class="admin-panel password-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Account security</p><h2>Change password</h2></div>
+          </div>
+          <form class="password-form" id="password-form">
+            <label>Current password<input name="oldPassword" type="password" autocomplete="current-password" required></label>
+            <label>New password <span>(at least 14 characters)</span><input name="newPassword" type="password" autocomplete="new-password" minlength="14" required></label>
+            <button class="button button-secondary" type="submit">Update password</button>
+          </form>
+          <p class="feedback" id="password-feedback" role="status" aria-live="polite"></p>
+        </section>
+      </section>
+    </main>
+    <footer>JEFTECH ELECTRICAL ENERGY LTD · OWERRI, IMO STATE</footer>
+  </body>
+</html>

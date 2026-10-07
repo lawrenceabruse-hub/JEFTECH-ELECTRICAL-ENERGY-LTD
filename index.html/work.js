@@ -1,12 +1,14 @@
 "use strict";
 
-const viewport = document.querySelector("#work-viewport");
-const gallery = document.querySelector("#work-gallery");
-const counter = document.querySelector("#work-counter");
-const previousButton = document.querySelector("#work-previous");
-const nextButton = document.querySelector("#work-next");
+function initializeWorkCarousel() {
+  const viewport = document.querySelector("#work-viewport");
+  const gallery = document.querySelector("#work-gallery");
+  const counter = document.querySelector("#work-counter");
+  const previousButton = document.querySelector("#work-previous");
+  const nextButton = document.querySelector("#work-next");
 
-if (viewport && gallery && counter && previousButton && nextButton) {
+  if (!viewport || !gallery || !counter || !previousButton || !nextButton || gallery.children.length === 0) return;
+
   const originalSlides = [...gallery.children];
   const slideCount = originalSlides.length;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -30,6 +32,7 @@ if (viewport && gallery && counter && previousButton && nextButton) {
   function updateCounter() {
     const displayedIndex = activeIndex % slideCount;
     counter.firstChild.textContent = `${String(displayedIndex + 1).padStart(2, "0")} `;
+    counter.lastChild.textContent = ` ${String(slideCount).padStart(2, "0")}`;
     counter.setAttribute("aria-label", `Photo ${displayedIndex + 1} of ${slideCount}`);
   }
 
@@ -115,3 +118,5 @@ if (viewport && gallery && counter && previousButton && nextButton) {
   moveTo(0);
   startAutoSlide();
 }
+
+window.jeftechContentReady.then(initializeWorkCarousel);

@@ -96,7 +96,7 @@
               Tell us what you need and let’s talk through the right solution.
             </p>
           </div>
-          <div class="service-grid">
+          <div class="service-grid" id="service-grid">
             <article class="service-card">
               <span class="service-number">01</span>
               <span class="service-icon" aria-hidden="true">
@@ -280,6 +280,44 @@
                   WhatsApp us <span aria-hidden="true">↗</span>
                 </a>
               </div>
+              <form class="enquiry-form" id="enquiry-form">
+                <h3>Send a project enquiry</h3>
+                <div class="enquiry-fields">
+                  <label>
+                    Your name
+                    <input name="name" autocomplete="name" maxlength="120" required>
+                  </label>
+                  <label>
+                    Email address
+                    <input name="email" type="email" autocomplete="email" maxlength="254" required>
+                  </label>
+                  <label>
+                    Phone number <span>(optional)</span>
+                    <input name="phone" type="tel" autocomplete="tel" maxlength="40">
+                  </label>
+                  <label>
+                    Service <span>(optional)</span>
+                    <select name="service">
+                      <option value="">Select a service</option>
+                      <option>Electrical design</option>
+                      <option>Installation</option>
+                      <option>Maintenance</option>
+                      <option>Repairs</option>
+                      <option>Other enquiry</option>
+                    </select>
+                  </label>
+                  <label class="enquiry-message">
+                    How can we help?
+                    <textarea name="message" rows="4" maxlength="5000" required></textarea>
+                  </label>
+                </div>
+                <label class="enquiry-trap" aria-hidden="true">
+                  Leave this field empty
+                  <input name="website" tabindex="-1" autocomplete="off">
+                </label>
+                <button class="button button-primary" type="submit">Send enquiry <span aria-hidden="true">↗</span></button>
+                <p class="enquiry-feedback" id="enquiry-feedback" role="status" aria-live="polite"></p>
+              </form>
             </div>
             <div class="contact-details">
               <div class="contact-detail">
@@ -322,6 +360,7 @@
         <span>RC 8918525 <i>·</i> OWERRI, IMO STATE, NIGERIA</span>
       </div>
     </footer>
+    <script src="site.js" defer></script>
     <script src="work.js" defer></script>
   </body>
 </html>
