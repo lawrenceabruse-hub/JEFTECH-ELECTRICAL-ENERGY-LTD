@@ -185,6 +185,13 @@ h1 span, .section-heading h2 span, .about-copy h2 span, .contact-copy h2 span { 
 .footer-main > p { margin: 0; color: #8994a3; font-size: 10px; }
 .footer-contacts { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
 .footer-email { font-size: 11px; font-weight: 600; }
+.social-links { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.social-label { margin-right: 3px; color: #8994a3; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.social-links a { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #dce5f0; border-radius: 50%; background: #fff; color: #304967; transition: color .2s, border-color .2s, background .2s, transform .2s; }
+.social-links a:hover { transform: translateY(-2px); border-color: var(--blue); background: var(--blue); color: #fff; }
+.social-links svg { width: 17px; height: 17px; fill: currentColor; }
+.social-links a:nth-of-type(2) svg { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.social-links a:nth-of-type(2) .social-icon-dot { fill: currentColor; stroke: none; }
 .footer-bottom { min-height: 55px; display: flex; align-items: center; justify-content: space-between; color: #8994a3; font-size: 8px; font-weight: 600; letter-spacing: .08em; }
 .footer-bottom i { color: var(--blue); }
 
@@ -444,6 +451,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   .footer-main { align-items: flex-start; flex-direction: column; justify-content: center; gap: 13px; padding: 23px 0; }
   .footer-main > p { margin: 0; }
   .footer-contacts { align-items: flex-start; }
+  .social-links { margin-top: 8px; }
   .footer-email { font-size: 10px; }
   .footer-bottom { align-items: flex-start; flex-direction: column; justify-content: center; gap: 8px; padding: 15px 0; font-size: 7px; }
 }
