@@ -8,6 +8,7 @@ A responsive company website with customer enquiry storage, a password-protected
 - The dashboard at `/admin` can add, edit, and remove services and work-gallery items.
 - Admin sign-in uses an HTTP-only, same-site session cookie and passwords hashed with Node.js scrypt.
 - Administrators can change their sign-in and password-recovery email from the dashboard after confirming their current password.
+- For an administrator who has lost access to the current inbox, an operator can change the existing database account address with `ADMIN_EMAIL_MIGRATION_FROM` and `ADMIN_EMAIL_MIGRATION_TO`. Set both to the old and new addresses; startup performs the change transactionally, invalidates pending reset tokens, and safely recognizes an already-completed migration.
 - Admin password recovery sends a single-use reset link by email; reset tokens expire after 30 minutes and successful resets revoke all existing sessions.
 - PostgreSQL stores administrator sessions, enquiries, services, and work-gallery content.
 

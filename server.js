@@ -292,6 +292,46 @@ async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS enquiries_created_idx ON enquiries (created_at DESC);
   `);
 
+  const migrationFrom = process.env.ADMIN_EMAIL_MIGRATION_FROM;
+  const migrationTo = process.env.ADMIN_EMAIL_MIGRATION_TO;
+  if (migrationFrom || migrationTo) {
+    if (!migrationFrom || !migrationTo) {
+      throw new Error("Set both ADMIN_EMAIL_MIGRATION_FROM and ADMIN_EMAIL_MIGRATION_TO to migrate the administrator email.");
+    }
+    const fromEmail = cleanEmail(migrationFrom);
+    const toEmail = cleanEmail(migrationTo);
+    if (fromEmail === toEmail) {
+      throw new Error("Administrator email migration source and destination must be different.");
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const matches = await client.query(
+        "SELECT id, email FROM admins WHERE email = ANY($1::text[]) FOR UPDATE",
+        [[fromEmail, toEmail]]
+      );
+      const sourceAdmin = matches.rows.find((admin) => admin.email === fromEmail);
+      const destinationAdmin = matches.rows.find((admin) => admin.email === toEmail);
+      if (sourceAdmin && destinationAdmin) {
+        throw new Error("Administrator email migration is ambiguous because both addresses already exist.");
+      }
+      if (sourceAdmin) {
+        await client.query("UPDATE admins SET email = $1 WHERE id = $2", [toEmail, sourceAdmin.id]);
+        await client.query("DELETE FROM admin_password_resets WHERE admin_id = $1", [sourceAdmin.id]);
+        console.info("Administrator email migration completed.");
+      } else if (!destinationAdmin) {
+        throw new Error("Administrator email migration source was not found; no account was changed.");
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   const adminCount = await pool.query("SELECT COUNT(*)::integer AS count FROM admins");
   if (adminCount.rows[0].count === 0) {
     const email = cleanEmail(process.env.ADMIN_EMAIL);
