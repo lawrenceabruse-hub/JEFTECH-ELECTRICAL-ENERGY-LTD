@@ -7,6 +7,7 @@ A responsive company website with customer enquiry storage, a password-protected
 - Website enquiries are saved for the admin to review and mark new, contacted, or closed.
 - The dashboard at `/admin` can add, edit, and remove services and work-gallery items.
 - Admin sign-in uses an HTTP-only, same-site session cookie and passwords hashed with Node.js scrypt.
+- Administrators can change their sign-in and password-recovery email from the dashboard after confirming their current password.
 - Admin password recovery sends a single-use reset link by email; reset tokens expire after 30 minutes and successful resets revoke all existing sessions.
 - PostgreSQL stores administrator sessions, enquiries, services, and work-gallery content.
 
@@ -41,5 +42,5 @@ Do not place database URLs, admin passwords, or other credentials in client-side
 ## Public contact details
 
 - Phone: `+234 706 758 7195`
-- Email: `jeftech12345@hotmail.com`
+- Email: `jeftech12345@gmail.com`
 - WhatsApp: `https://wa.me/2347067587195`

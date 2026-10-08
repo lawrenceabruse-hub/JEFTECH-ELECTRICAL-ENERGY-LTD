@@ -555,6 +555,45 @@ async function handleApi(request, response, pathname, searchParams) {
     return true;
   }
 
+  if (pathname === "/api/admin/email" && request.method === "PUT") {
+    if (!rateLimit(`email-change:${authenticatedAdmin.id}:${getClientAddress(request)}`, 5, 15 * 60 * 1000)) {
+      sendError(response, 429, "Too many email-change attempts. Please try again later.");
+      return true;
+    }
+    const body = await readJson(request);
+    const email = cleanEmail(body.email);
+    if (typeof body.currentPassword !== "string" || !body.currentPassword.length || body.currentPassword.length > 200) {
+      throw Object.assign(new Error("Current password is required and must be at most 200 characters."), { statusCode: 400 });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await client.query("SELECT password_hash FROM admins WHERE id = $1 FOR UPDATE", [authenticatedAdmin.id]);
+      if (!result.rowCount || !(await verifyPassword(body.currentPassword, result.rows[0].password_hash))) {
+        await client.query("ROLLBACK");
+        sendError(response, 401, "Current password is incorrect.");
+        return true;
+      }
+      const duplicate = await client.query("SELECT 1 FROM admins WHERE email = $1 AND id <> $2", [email, authenticatedAdmin.id]);
+      if (duplicate.rowCount) {
+        await client.query("ROLLBACK");
+        sendError(response, 409, "That email address is already assigned to an administrator.");
+        return true;
+      }
+      await client.query("UPDATE admins SET email = $1 WHERE id = $2", [email, authenticatedAdmin.id]);
+      await client.query("DELETE FROM admin_password_resets WHERE admin_id = $1", [authenticatedAdmin.id]);
+      await client.query("COMMIT");
+      sendJson(response, 200, { email, message: "Admin email updated. Use the new address the next time you sign in." });
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   if (pathname === "/api/admin/enquiries" && request.method === "GET") {
     const status = searchParams.get("status");
     const values = ["new", "contacted", "closed"];
