@@ -4,6 +4,13 @@ const loginPanel = document.querySelector("#login-panel");
 const dashboard = document.querySelector("#dashboard");
 const loginForm = document.querySelector("#login-form");
 const loginFeedback = document.querySelector("#login-feedback");
+const forgotPasswordPanel = document.querySelector("#forgot-password-panel");
+const resetPasswordPanel = document.querySelector("#reset-password-panel");
+const forgotPasswordForm = document.querySelector("#forgot-password-form");
+const forgotPasswordFeedback = document.querySelector("#forgot-password-feedback");
+const resetPasswordForm = document.querySelector("#reset-password-form");
+const resetPasswordFeedback = document.querySelector("#reset-password-feedback");
+const resetToken = new URLSearchParams(window.location.search).get("reset");
 
 const loginPassword = document.querySelector("#login-password");
 const loginPasswordToggle = document.querySelector(".password-toggle");
@@ -21,6 +28,12 @@ function setFeedback(element, message, kind = "") {
   element.textContent = message;
   element.classList.toggle("is-error", kind === "error");
   element.classList.toggle("is-success", kind === "success");
+}
+
+function showLoginPanel() {
+  forgotPasswordPanel.hidden = true;
+  resetPasswordPanel.hidden = true;
+  loginPanel.hidden = false;
 }
 
 async function api(path, options = {}) {
@@ -285,6 +298,60 @@ loginForm.addEventListener("submit", async (event) => {
   }
 });
 
+document.querySelector("#forgot-password-button").addEventListener("click", () => {
+  document.querySelector('#forgot-password-form input[name="email"]').value =
+    loginForm.elements.email.value;
+  loginPanel.hidden = true;
+  forgotPasswordPanel.hidden = false;
+  forgotPasswordForm.elements.email.focus();
+});
+
+document.querySelector("#back-to-login-button").addEventListener("click", showLoginPanel);
+
+forgotPasswordForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = forgotPasswordForm.querySelector("button[type=submit]");
+  button.disabled = true;
+  setFeedback(forgotPasswordFeedback, "Requesting a reset link…");
+  try {
+    const result = await api("/api/admin/password/forgot", {
+      method: "POST",
+      body: JSON.stringify({ email: forgotPasswordForm.elements.email.value })
+    });
+    setFeedback(forgotPasswordFeedback, result.message, "success");
+  } catch (error) {
+    setFeedback(forgotPasswordFeedback, error.message, "error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+resetPasswordForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const password = resetPasswordForm.elements.password.value;
+  if (password !== resetPasswordForm.elements.confirmation.value) {
+    setFeedback(resetPasswordFeedback, "The passwords do not match.", "error");
+    return;
+  }
+  const button = resetPasswordForm.querySelector("button[type=submit]");
+  button.disabled = true;
+  setFeedback(resetPasswordFeedback, "Updating your password…");
+  try {
+    const result = await api("/api/admin/password/reset", {
+      method: "POST",
+      body: JSON.stringify({ token: resetToken, password })
+    });
+    resetPasswordForm.reset();
+    window.history.replaceState(null, "", "/admin");
+    showLoginPanel();
+    setFeedback(loginFeedback, result.message, "success");
+  } catch (error) {
+    setFeedback(resetPasswordFeedback, error.message, "error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
 document.querySelector("#logout-button").addEventListener("click", async () => {
   try {
     await api("/api/admin/logout", { method: "POST" });
@@ -341,11 +408,17 @@ document.querySelector("#password-form").addEventListener("submit", async (event
   }
 });
 
-api("/api/admin/session")
-  .then((session) => showDashboard(session.email))
-  .catch((error) => {
-    if (!(error instanceof Error) || error.status !== 401) {
-      console.error("Could not check the admin session.", error);
-      setFeedback(loginFeedback, error.message, "error");
-    }
-  });
+if (resetToken) {
+  loginPanel.hidden = true;
+  resetPasswordPanel.hidden = false;
+  resetPasswordForm.elements.password.focus();
+} else {
+  api("/api/admin/session")
+    .then((session) => showDashboard(session.email))
+    .catch((error) => {
+      if (!(error instanceof Error) || error.status !== 401) {
+        console.error("Could not check the admin session.", error);
+        setFeedback(loginFeedback, error.message, "error");
+      }
+    });
+}

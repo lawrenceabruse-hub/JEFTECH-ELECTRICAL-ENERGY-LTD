@@ -34,6 +34,8 @@ input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible
 .button-primary { background: var(--blue); color: #fff; }
 .button-primary:hover { background: #0d59af; }
 .button-secondary { border: 1px solid #cdd8e5; background: white; color: var(--ink); }
+.text-button { margin-top: 16px; padding: 0; border: 0; background: none; color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 700; }
+.text-button:hover { color: #0d59af; text-decoration: underline; }
 .feedback { min-height: 1.4em; margin: 12px 0 0; color: #52667f; font-size: 13px; line-height: 1.5; }
 .feedback.is-error { color: #a52b28; }
 .feedback.is-success { color: #087244; }

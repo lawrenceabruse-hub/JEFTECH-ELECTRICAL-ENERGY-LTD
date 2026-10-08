@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#0b1930">
     <title>Website administration | JEFTECH ELECTRICAL ENERGY LTD</title>
     <link rel="icon" href="jeftech-mark.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css?v=20261008-password-toggle">
-    <script src="admin.js" defer></script>
+    <link rel="stylesheet" href="admin.css?v=20261008-recovery">
+    <script src="admin.js?v=20261008-recovery" defer></script>
   </head>
   <body>
     <header class="admin-header">
@@ -34,7 +34,32 @@
           </label>
           <button class="button button-primary" type="submit">Sign in</button>
         </form>
+        <button class="text-button" id="forgot-password-button" type="button">Forgot password?</button>
         <p class="feedback" id="login-feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="login-panel" id="forgot-password-panel" hidden>
+        <p class="eyebrow">Account recovery</p>
+        <h1>Forgot password?</h1>
+        <p>Enter the administrator email address. If it matches an admin account and email delivery is configured, we’ll send a one-time reset link.</p>
+        <form id="forgot-password-form">
+          <label>Email address<input name="email" type="email" autocomplete="username" required></label>
+          <button class="button button-primary" type="submit">Send reset link</button>
+        </form>
+        <button class="text-button" id="back-to-login-button" type="button">Back to sign in</button>
+        <p class="feedback" id="forgot-password-feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="login-panel" id="reset-password-panel" hidden>
+        <p class="eyebrow">Secure account recovery</p>
+        <h1>Set a new password</h1>
+        <p>Choose a unique password with at least 14 characters. This reset link can only be used once.</p>
+        <form id="reset-password-form">
+          <label>New password<input name="password" type="password" autocomplete="new-password" minlength="14" maxlength="200" required></label>
+          <label>Confirm new password<input name="confirmation" type="password" autocomplete="new-password" minlength="14" maxlength="200" required></label>
+          <button class="button button-primary" type="submit">Reset password</button>
+        </form>
+        <p class="feedback" id="reset-password-feedback" role="status" aria-live="polite"></p>
       </section>
 
       <section class="dashboard" id="dashboard" hidden>
