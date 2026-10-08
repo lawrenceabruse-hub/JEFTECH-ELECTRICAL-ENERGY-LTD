@@ -21,6 +21,12 @@ label { display: grid; gap: 7px; color: #344962; font-size: 12px; font-weight: 7
 label span { display: inline; color: var(--muted); font-weight: 400; }
 .login-panel form, .password-form { display: grid; gap: 15px; }
 input, textarea, select { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid #cad5e2; border-radius: 7px; background: #fff; color: var(--ink); }
+.password-input { position: relative; display: block; }
+.password-input input { padding-right: 48px; }
+.password-toggle { width: 42px; height: 42px; position: absolute; top: 0; right: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: 0 7px 7px 0; background: transparent; color: #52667f; cursor: pointer; }
+.password-toggle:hover { color: var(--blue); }
+.password-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.password-toggle:focus-visible { z-index: 1; }
 textarea { min-height: 100px; resize: vertical; }
 input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible { outline: 3px solid rgba(23, 111, 209, .3); outline-offset: 2px; border-color: var(--blue); }
 .button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; border: 0; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 800; transition: transform .15s, background .15s; }

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0b1930">
     <title>Website administration | JEFTECH ELECTRICAL ENERGY LTD</title>
     <link rel="icon" href="jeftech-mark.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=20261008-password-toggle">
     <script src="admin.js" defer></script>
   </head>
   <body>
@@ -24,7 +24,14 @@
         <p>Sign in to manage customer enquiries, services, and the work gallery.</p>
         <form id="login-form">
           <label>Email address<input name="email" type="email" autocomplete="username" required></label>
-          <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+          <label>Password
+            <span class="password-input">
+              <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+              <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false" aria-controls="login-password">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </span>
+          </label>
           <button class="button button-primary" type="submit">Sign in</button>
         </form>
         <p class="feedback" id="login-feedback" role="status" aria-live="polite"></p>

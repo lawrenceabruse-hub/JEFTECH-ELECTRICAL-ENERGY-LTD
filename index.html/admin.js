@@ -5,6 +5,18 @@ const dashboard = document.querySelector("#dashboard");
 const loginForm = document.querySelector("#login-form");
 const loginFeedback = document.querySelector("#login-feedback");
 
+const loginPassword = document.querySelector("#login-password");
+const loginPasswordToggle = document.querySelector(".password-toggle");
+loginPasswordToggle.addEventListener("click", () => {
+  const showPassword = loginPassword.type === "password";
+  loginPassword.type = showPassword ? "text" : "password";
+  loginPasswordToggle.setAttribute("aria-label", showPassword ? "Hide password" : "Show password");
+  loginPasswordToggle.setAttribute("aria-pressed", String(showPassword));
+  loginPasswordToggle.innerHTML = showPassword
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a16.5 16.5 0 0 1-3.2 4.1M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10.5 10.5 0 0 0 4.1-.8"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+});
+
 function setFeedback(element, message, kind = "") {
   element.textContent = message;
   element.classList.toggle("is-error", kind === "error");
