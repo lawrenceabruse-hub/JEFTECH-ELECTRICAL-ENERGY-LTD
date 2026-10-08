@@ -19,7 +19,7 @@ h2 { font-size: 23px; }
 .login-panel > p:not(.eyebrow) { margin: 12px 0 23px; color: var(--muted); font-size: 14px; line-height: 1.7; }
 label { display: grid; gap: 7px; color: #344962; font-size: 12px; font-weight: 700; }
 label span { display: inline; color: var(--muted); font-weight: 400; }
-.login-panel form, .password-form { display: grid; gap: 15px; }
+.login-panel form, .password-form, .account-email-form { display: grid; gap: 15px; }
 input, textarea, select { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid #cad5e2; border-radius: 7px; background: #fff; color: var(--ink); }
 .password-input { position: relative; display: block; }
 .password-input input { padding-right: 48px; }
@@ -65,7 +65,9 @@ input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible
 .editor-form .wide-field, .editor-actions { grid-column: 1 / -1; }
 .editor-actions { display: flex; gap: 8px; }
 .password-form { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; }
-.password-form button { grid-column: 1 / -1; justify-self: start; }
+.password-form button, .account-email-form button { justify-self: start; }
+.account-email-copy { margin: 0 0 14px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.account-email-copy strong { color: var(--ink); }
 footer { padding: 20px; border-top: 1px solid var(--line); color: var(--muted); text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
 
 @media (max-width: 640px) {

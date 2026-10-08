@@ -277,6 +277,7 @@ async function showDashboard(email) {
   loginPanel.hidden = true;
   dashboard.hidden = false;
   document.querySelector("#admin-email").textContent = email;
+  document.querySelector("#admin-email-current").textContent = email;
   await Promise.all([loadEnquiries(), loadServices(), loadProjects()]);
 }
 
@@ -403,6 +404,28 @@ document.querySelector("#password-form").addEventListener("submit", async (event
     setFeedback(document.querySelector("#password-feedback"), result.message, "success");
   } catch (error) {
     setFeedback(document.querySelector("#password-feedback"), error.message, "error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.querySelector("#account-email-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector("button");
+  button.disabled = true;
+  try {
+    const result = await api("/api/admin/email", {
+      method: "PUT",
+      body: JSON.stringify(Object.fromEntries(new FormData(form).entries()))
+    });
+    form.elements.currentPassword.value = "";
+    form.elements.email.value = result.email;
+    document.querySelector("#admin-email").textContent = result.email;
+    document.querySelector("#admin-email-current").textContent = result.email;
+    setFeedback(document.querySelector("#account-email-feedback"), result.message, "success");
+  } catch (error) {
+    setFeedback(document.querySelector("#account-email-feedback"), error.message, "error");
   } finally {
     button.disabled = false;
   }

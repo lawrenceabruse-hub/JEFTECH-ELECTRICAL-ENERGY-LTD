@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#0b1930">
     <title>Website administration | JEFTECH ELECTRICAL ENERGY LTD</title>
     <link rel="icon" href="jeftech-mark.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css?v=20261008-recovery">
-    <script src="admin.js?v=20261008-recovery" defer></script>
+    <link rel="stylesheet" href="admin.css?v=20261008-gmail-email">
+    <script src="admin.js?v=20261008-gmail-email" defer></script>
   </head>
   <body>
     <header class="admin-header">
@@ -106,6 +106,19 @@
           <p class="feedback" id="project-feedback" role="status" aria-live="polite"></p>
           <form class="editor-form" id="project-form" hidden></form>
           <div class="content-list" id="project-list"></div>
+        </section>
+
+        <section class="admin-panel password-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Account security</p><h2>Administrator email</h2></div>
+          </div>
+          <p class="account-email-copy">Current sign-in and recovery email: <strong id="admin-email-current"></strong></p>
+          <form class="account-email-form" id="account-email-form">
+            <label>New email address<input name="email" type="email" autocomplete="email" value="jeftech12345@gmail.com" maxlength="254" required></label>
+            <label>Current password<input name="currentPassword" type="password" autocomplete="current-password" required></label>
+            <button class="button button-secondary" type="submit">Update admin email</button>
+          </form>
+          <p class="feedback" id="account-email-feedback" role="status" aria-live="polite"></p>
         </section>
 
         <section class="admin-panel password-panel">

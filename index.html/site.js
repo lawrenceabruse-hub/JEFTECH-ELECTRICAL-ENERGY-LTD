@@ -8,7 +8,7 @@ function createServiceCard(service, index, template) {
   card.querySelector(".service-number").textContent = String(index + 1).padStart(2, "0");
   title.textContent = service.title;
   description.textContent = service.description;
-  link.href = `mailto:jeftech12345@hotmail.com?subject=${encodeURIComponent(`${service.title} enquiry`)}`;
+  link.href = `mailto:jeftech12345@gmail.com?subject=${encodeURIComponent(`${service.title} enquiry`)}`;
   link.setAttribute("aria-label", `Enquire about ${service.title}`);
   return card;
 }
