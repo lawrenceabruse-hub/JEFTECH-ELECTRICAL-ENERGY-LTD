@@ -15,6 +15,7 @@ const WEBSITE_DIR = [
 ].find((directory) => fs.existsSync(path.join(directory, "index.html"))) || path.join(__dirname, "index.html");
 const MAX_BODY_BYTES = 20_000;
 const SESSION_DURATION_MS = 12 * 60 * 60 * 1000;
+const PASSWORD_RESET_DURATION_MS = 30 * 60 * 1000;
 const scrypt = promisify(crypto.scrypt);
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -252,6 +253,12 @@ async function initializeDatabase() {
       expires_at TIMESTAMPTZ NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS admin_password_resets (
+      token_hash TEXT PRIMARY KEY,
+      admin_id BIGINT NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
     CREATE TABLE IF NOT EXISTS services (
       id BIGSERIAL PRIMARY KEY,
       title TEXT NOT NULL,
@@ -281,6 +288,7 @@ async function initializeDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS admin_sessions_expiry_idx ON admin_sessions (expires_at);
+    CREATE INDEX IF NOT EXISTS admin_password_resets_admin_idx ON admin_password_resets (admin_id);
     CREATE INDEX IF NOT EXISTS enquiries_created_idx ON enquiries (created_at DESC);
   `);
 
@@ -311,6 +319,32 @@ async function initializeDatabase() {
     }
   }
   await pool.query("DELETE FROM admin_sessions WHERE expires_at <= NOW()");
+  await pool.query("DELETE FROM admin_password_resets WHERE expires_at <= NOW()");
+}
+
+async function sendPasswordResetEmail(email, resetUrl) {
+  if (!process.env.RESEND_API_KEY || !process.env.RESET_EMAIL_FROM) {
+    throw new Error("Password reset email is not configured (set RESEND_API_KEY and RESET_EMAIL_FROM).");
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: process.env.RESET_EMAIL_FROM,
+      to: [email],
+      subject: "Reset your JEFTECH website admin password",
+      text: `A password reset was requested for your JEFTECH website administrator account.\n\nUse this one-time link within 30 minutes:\n${resetUrl}\n\nIf you did not request this, you can ignore this email.`,
+      html: `<p>A password reset was requested for your JEFTECH website administrator account.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This one-time link expires in 30 minutes. If you did not request this, you can ignore this email.</p>`
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Password reset email provider returned HTTP ${response.status}.`);
+  }
 }
 
 async function handleApi(request, response, pathname, searchParams) {
@@ -373,6 +407,106 @@ async function handleApi(request, response, pathname, searchParams) {
     setSessionCookie(response, token, SESSION_DURATION_MS / 1000);
     sendJson(response, 200, { email: admin.email });
     return true;
+  }
+
+  if (pathname === "/api/admin/password/forgot" && request.method === "POST") {
+    assertSameOrigin(request);
+    if (!rateLimit(`password-reset:${getClientAddress(request)}`, 5, 60 * 60 * 1000)) {
+      sendError(response, 429, "Too many reset requests. Please wait before trying again.");
+      return true;
+    }
+    const body = await readJson(request);
+    const email = cleanEmail(body.email);
+    const emailHash = crypto.createHash("sha256").update(email).digest("hex");
+    if (!rateLimit(`password-reset-email:${emailHash}`, 3, 60 * 60 * 1000)) {
+      sendJson(response, 202, { message: "If an admin account matches and email delivery is configured, a reset link will arrive shortly." });
+      return true;
+    }
+
+    sendJson(response, 202, {
+      message: "If an admin account matches and email delivery is configured, a reset link will arrive shortly."
+    });
+    let resetTokenHash = "";
+    try {
+      const adminResult = await pool.query("SELECT id FROM admins WHERE email = $1", [email]);
+      if (adminResult.rowCount) {
+        const token = crypto.randomBytes(32).toString("base64url");
+        const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+        resetTokenHash = tokenHash;
+        const expiresAt = new Date(Date.now() + PASSWORD_RESET_DURATION_MS);
+        await pool.query("DELETE FROM admin_password_resets WHERE admin_id = $1", [adminResult.rows[0].id]);
+        await pool.query(
+          "INSERT INTO admin_password_resets (token_hash, admin_id, expires_at) VALUES ($1, $2, $3)",
+          [tokenHash, adminResult.rows[0].id, expiresAt]
+        );
+
+        const baseUrl = process.env.PUBLIC_BASE_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+        const parsedBaseUrl = new URL(baseUrl);
+        if (IS_PRODUCTION && parsedBaseUrl.protocol !== "https:") {
+          throw new Error("Password reset links must use HTTPS in production.");
+        }
+        parsedBaseUrl.search = "";
+        parsedBaseUrl.hash = "";
+        parsedBaseUrl.pathname = "/admin";
+        parsedBaseUrl.searchParams.set("reset", token);
+        await sendPasswordResetEmail(email, parsedBaseUrl.toString());
+      }
+    } catch (error) {
+      if (resetTokenHash) {
+        try {
+          await pool.query("DELETE FROM admin_password_resets WHERE token_hash = $1", [resetTokenHash]);
+        } catch (cleanupError) {
+          console.error(`Could not remove an undelivered password reset token (${cleanupError.message}).`);
+        }
+      }
+      console.error(`Could not process admin password reset request (${error.message}).`);
+    }
+    return true;
+  }
+
+  if (pathname === "/api/admin/password/reset" && request.method === "POST") {
+    assertSameOrigin(request);
+    if (!rateLimit(`password-reset-complete:${getClientAddress(request)}`, 10, 60 * 60 * 1000)) {
+      sendError(response, 429, "Too many password reset attempts. Please try again later.");
+      return true;
+    }
+    const body = await readJson(request);
+    if (typeof body.token !== "string" || !/^[A-Za-z0-9_-]{40,60}$/.test(body.token)) {
+      sendError(response, 400, "This reset link is invalid or has expired. Request a new one.");
+      return true;
+    }
+    if (typeof body.password !== "string" || body.password.length < 14 || body.password.length > 200) {
+      sendError(response, 400, "New password must be between 14 and 200 characters.");
+      return true;
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(body.token).digest("hex");
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const reset = await client.query(
+        "DELETE FROM admin_password_resets WHERE token_hash = $1 AND expires_at > NOW() RETURNING admin_id",
+        [tokenHash]
+      );
+      if (!reset.rowCount) {
+        await client.query("ROLLBACK");
+        sendError(response, 400, "This reset link is invalid or has expired. Request a new one.");
+        return true;
+      }
+
+      const adminId = reset.rows[0].admin_id;
+      await client.query("UPDATE admins SET password_hash = $1 WHERE id = $2", [await hashPassword(body.password), adminId]);
+      await client.query("DELETE FROM admin_password_resets WHERE admin_id = $1", [adminId]);
+      await client.query("DELETE FROM admin_sessions WHERE admin_id = $1", [adminId]);
+      await client.query("COMMIT");
+      sendJson(response, 200, { message: "Password reset. You can now sign in with your new password." });
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   if (pathname.startsWith("/api/admin/")) {

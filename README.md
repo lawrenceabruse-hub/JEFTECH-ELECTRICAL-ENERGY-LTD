@@ -7,9 +7,10 @@ A responsive company website with customer enquiry storage, a password-protected
 - Website enquiries are saved for the admin to review and mark new, contacted, or closed.
 - The dashboard at `/admin` can add, edit, and remove services and work-gallery items.
 - Admin sign-in uses an HTTP-only, same-site session cookie and passwords hashed with Node.js scrypt.
+- Admin password recovery sends a single-use reset link by email; reset tokens expire after 30 minutes and successful resets revoke all existing sessions.
 - PostgreSQL stores administrator sessions, enquiries, services, and work-gallery content.
 
-Enquiries are stored in the dashboard; this backend does not email notifications. A configured email provider can be added separately if email alerts are required.
+Enquiries are stored in the dashboard; this backend does not email enquiry notifications. Password recovery uses the Resend email API.
 
 ## Run locally
 
@@ -27,11 +28,13 @@ Open [http://localhost:3000](http://localhost:3000). The admin dashboard is at [
 The Render web service can stay on the free plan. The database provider has its own plan limits and terms; verify its current free tier, backups, and retention before relying on it for business records.
 
 1. Create a PostgreSQL database with a provider that supports external TLS connections. Copy its private connection URL (do not post it publicly).
-2. In the Render dashboard, open the website service’s **Environment** settings. Add `DATABASE_URL` with that connection URL, `ADMIN_EMAIL` with the administrator email, and `ADMIN_PASSWORD` with a unique password of at least 14 characters. Do not use the example password.
-3. Upload/push the project files to the connected GitHub repository, preserving the root `server.js`, `package.json`, `render.yaml`, and entire `index.html/` directory (including `images/`).
-4. Deploy the latest commit in Render. Check `/healthz` for `"status":"ok"`, `"databaseConnected":true`, and `"websiteAssetsAvailable":true`.
-5. Open `/admin`, sign in with `ADMIN_EMAIL` and the initial `ADMIN_PASSWORD`, then change the password in the dashboard. On first boot the configured credentials are hashed into the database; later changing the environment variable alone does not reset the stored password.
-6. Submit a test enquiry from the public contact form and verify it appears under **Enquiries**. Add or edit a service/gallery item and reload the public page to verify it.
+2. Create a Resend account and an API key. For Resend's test sender, verify the administrator recipient email in Resend; production sending to arbitrary recipients requires a verified sender domain.
+3. In the Render dashboard, open the website service’s **Environment** settings. Add `DATABASE_URL` with that connection URL, `ADMIN_EMAIL` with the administrator email, and `ADMIN_PASSWORD` with a unique password of at least 14 characters. Add `RESEND_API_KEY` with the private Resend API key and `RESET_EMAIL_FROM` with a sender verified by Resend (for example, `JEFTECH Website <onboarding@resend.dev>` when using the verified test recipient). Do not place secrets in source files or chat.
+4. Upload/push the project files to the connected GitHub repository, preserving the root `server.js`, `package.json`, `render.yaml`, and entire `index.html/` directory (including `images/`).
+5. Deploy the latest commit in Render. Check `/healthz` for `"status":"ok"`, `"databaseConnected":true`, and `"websiteAssetsAvailable":true`.
+6. Open `/admin`, sign in with `ADMIN_EMAIL` and the initial `ADMIN_PASSWORD`, then change the password in the dashboard. On first boot the configured credentials are hashed into the database; later changing the environment variable alone does not reset the stored password.
+7. Test password recovery with the administrator email, verify the email arrives, use the one-time link, and sign in with the new password.
+8. Submit a test enquiry from the public contact form and verify it appears under **Enquiries**. Add or edit a service/gallery item and reload the public page to verify it.
 
 Do not place database URLs, admin passwords, or other credentials in client-side files, commit history, screenshots, or public messages. Render's free web service may spin down while idle, causing a delay on the first request.
 
